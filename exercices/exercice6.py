@@ -2,9 +2,9 @@ import cv2 as cv
 import numpy as np
 def exercice6():
     # Chargement des images étiquette lait
-    lait_ok = cv.imread('ressources/images/1.BMP', cv.IMREAD_GRAYSCALE)
+    etalon = cv.imread('ressources/images/1.BMP', cv.IMREAD_GRAYSCALE)
     lait_ko = cv.imread('ressources/images/LAIT_KO.bmp', cv.IMREAD_GRAYSCALE)
-    etalon = cv.imread('ressources/images/LAIT_OK.bmp', cv.IMREAD_GRAYSCALE)
+    lait_ok = cv.imread('ressources/images/LAIT_OK.bmp', cv.IMREAD_GRAYSCALE)
 
     # Calcul des projections
     projection_lignes = np.sum(lait_ok, axis=1) # somme par ligne=projection verticale
