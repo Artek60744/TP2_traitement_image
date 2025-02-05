@@ -3,8 +3,8 @@ import numpy as np
 def exercice6():
     # Chargement des images étiquette lait
     etalon = cv.imread('ressources/images/1.BMP', cv.IMREAD_GRAYSCALE)
-    lait_ko = cv.imread('ressources/images/LAIT_KO.bmp', cv.IMREAD_GRAYSCALE)
-    lait_ok = cv.imread('ressources/images/LAIT_OK.bmp', cv.IMREAD_GRAYSCALE)
+    lait_ok = cv.imread('ressources/images/LAIT_KO.bmp', cv.IMREAD_GRAYSCALE)
+    #lait_ok = cv.imread('ressources/images/LAIT_OK.bmp', cv.IMREAD_GRAYSCALE)
 
     # Calcul des projections
     projection_lignes = np.sum(lait_ok, axis=1) # somme par ligne=projection verticale
@@ -36,14 +36,41 @@ def exercice6():
     cv.imshow("date lait OK", date_lait_ok)
     cv.waitKey(0)
     _, date_lait_ok_binary = cv.threshold(date_lait_ok, 0, 255, cv.THRESH_BINARY_INV +cv.THRESH_OTSU)
-    cv.imshow("date lait OK binarise", date_lait_ok_binary)
+    cv.imshow("date binarise", date_lait_ok_binary)
     cv.waitKey(0)
+
     ## Extraction du premier caractère de la date
-    # Trouver les contours
+
+    # detection des contours.
     contours_date,_= cv.findContours(date_lait_ok_binary, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
-    # print(f"Nb caractères détectés: {len(contours_date)}")
-    # extraire le premier contour détecté (le plus à gauche donc)
+
+    # extraire le premier contour (gauche à droite)
     x, y, w, h = cv.boundingRect(contours_date[0])
     premier_caractere_date = date_lait_ok_binary[y:y + h, x:x + w]
-    cv.imshow("premier caractere date (1)", premier_caractere_date)
+    cv.imshow("premier caractere", premier_caractere_date)
+    cv.waitKey(0)
+
+    ### Comparaison du premier caractère avec le 1 étalon
+
+    # Inverser l'image étalon pour correspondre au caractère (blanc sur noir)
+    etalon = 255 - etalon
+    # Dimensions communes : choisir les dimensions maximales
+    H, W = max(premier_caractere_date.shape[0], etalon.shape[0]),max(premier_caractere_date.shape[1], etalon.shape[1])
+
+    # Redimensionner les deux images à la même taille
+    resized_char = cv.resize(premier_caractere_date, (W, H), interpolation=cv.INTER_NEAREST)
+    resized_etalon = cv.resize(etalon, (W, H), interpolation=cv.INTER_NEAREST)
+
+    # Comparaison pixel par pixel
+    difference = np.sum(resized_char != resized_etalon)  # Nombre de pixels différents
+    print(f"Nb de pixels différents : {difference}")
+
+    # Décision basée sur un seuil
+    if difference > 75:
+        print(f"Trop de diff")
+    else:
+        print(f"c'est un 1")
+
+    # Affichage de la différence
+    cv.imshow("difference", cv.absdiff(resized_char, resized_etalon))
     cv.waitKey(0)
